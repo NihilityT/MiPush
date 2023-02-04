@@ -17,7 +17,7 @@ class PinDuoDuo : Common() {
         Application::class.java.hookMethod("attach", Context::class.java) {
             doAfter {
                 val context: Context = thisObject as Context
-                val hwPushReceiver = ComponentName(context, "com.aimi.android.common.push.huawei.HwPushReceiver")
+                val hwPushReceiver = ComponentName(context, "com.aimi.android.common.push.xiaomi.MiPushReceiver")
                 context.packageManager.setComponentEnabledSetting(hwPushReceiver, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0)
             }
         }
