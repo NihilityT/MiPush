@@ -36,6 +36,18 @@ object HookPushNC {
 
 //        PushSignWatcher.watch()
 
+        val notificationController = classLoader.findClass("com.xiaomi.xmsf.push.notification.NotificationController")
+
+        notificationController.hookMethod(
+                "isMiPushInstalled"
+        ) {
+            replace(hookCheck) {
+                tryInvoke {
+                    return@replace true
+                }
+            }
+        }
+
         val classNotificationManager = classLoader.findClass(TargetClass)
 
         //notify(
