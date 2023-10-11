@@ -11,6 +11,7 @@ import one.yufz.hmspush.hook.hms.nm.SystemNotificationManager
 import one.yufz.hmspush.hook.system.HookSystemService
 import one.yufz.xposed.findClass
 import one.yufz.xposed.hookMethod
+import one.yufz.xposed.set
 import java.lang.reflect.InvocationTargetException
 
 object HookPushNC {
@@ -37,6 +38,12 @@ object HookPushNC {
 //        PushSignWatcher.watch()
 
         val classNotificationManager = classLoader.findClass(TargetClass)
+
+        try {
+            classNotificationManager["isHooked"] = true
+        } catch (_: Throwable) {
+
+        }
 
         //notify(
         //        packageName: String,
