@@ -63,21 +63,11 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-    buildFeatures {
-        compose true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion '1.3.0'
-    }
 }
-
 dependencies {
     api project(":common")
     api project(":xposed")
 
     //remove this line will cause proguard to remove code from library module
     compileOnly 'de.robv.android.xposed:api:82'
-
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
-
 }
