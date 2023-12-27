@@ -4,6 +4,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage
 import one.yufz.hmspush.hook.XLog
 import one.yufz.xposed.hookMethod
 import miui.external.SdkHelper
+import one.yufz.hmspush.xposed.BuildConfig
 
 open class Common : IFakeDevice {
     companion object {
@@ -46,7 +47,9 @@ open class Common : IFakeDevice {
                     XLog.d(TAG, "forHook $requestClass")
                     result = returnClass
                 } else {
-                    XLog.d(TAG, "forName $requestClass")
+                    if (BuildConfig.DEBUG) {
+                        XLog.d(TAG, "forName $requestClass")
+                    }
                 }
             }
         }
