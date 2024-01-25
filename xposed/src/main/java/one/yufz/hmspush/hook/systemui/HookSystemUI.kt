@@ -3,13 +3,17 @@ package one.yufz.hmspush.hook.systemui
 import android.app.AndroidAppHelper
 import android.app.Notification
 import android.content.Context
+import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.view.View
 import android.widget.RemoteViews
+import de.robv.android.xposed.XposedHelpers
+import one.yufz.hmspush.hook.XLog
 import one.yufz.xposed.callMethod
 import one.yufz.xposed.findClass
 import one.yufz.xposed.get
+import one.yufz.xposed.hook
 import one.yufz.xposed.hookAllMethods
 import one.yufz.xposed.hookMethod
 
@@ -63,6 +67,71 @@ class HookSystemUI {
                     result = true
                 }
             }
+        }
+    }
+
+
+    fun removeHyperOSFocusNotificationPackageLimit(classLoader: ClassLoader) {
+        val tag = "FocusNotification"
+        try {
+            val classFactory = XposedHelpers.findClass(
+                "com.android.systemui.shared.plugins.PluginInstance\$Factory",
+                classLoader
+            )
+            var appInfo: ApplicationInfo? = null
+            classFactory.declaredMethods.find { it.name == "create" }!!.hook {
+                doBefore {
+                    appInfo = args[1] as ApplicationInfo
+                }
+            }
+            val classExternalSyntheticLambda0 = XposedHelpers.findClass(
+                "com.android.systemui.shared.plugins.PluginInstance\$Factory$\$ExternalSyntheticLambda0",
+                classLoader
+            )
+            classExternalSyntheticLambda0.declaredMethods.find { it.name == "get" }!!.hook {
+                var isHooked = false;
+                doAfter {
+                    if (appInfo == null) {
+                        XLog.d(tag, "appInfo is null")
+                        return@doAfter
+                    }
+                    if ("miui.systemui.plugin" == appInfo!!.packageName && !isHooked) {
+                        try {
+                            isHooked = true
+                            var pluginLoader = result as ClassLoader;
+
+                            XLog.d(tag, "hook start")
+                            val classNotificationSettingsManager = XposedHelpers.findClass(
+                                "miui.systemui.notification.NotificationSettingsManager",
+                                pluginLoader
+                            )
+
+                            XLog.d(tag, "hook method")
+                            classNotificationSettingsManager.declaredMethods.find { it.name == "canCustomFocus" }!!
+                                .hook {
+                                    replace {
+                                        true
+                                    }
+                                }
+                            classNotificationSettingsManager.declaredMethods.find { it.name == "canShowFocus" }!!
+                                .hook {
+                                    replace {
+                                        true
+                                    }
+                                }
+                            XLog.d(tag, "hook end")
+                        } catch (e: Throwable) {
+                            XLog.e(
+                                tag,
+                                "hook NotificationSettingsManager failure: " + e.message,
+                                e
+                            )
+                        }
+                    }
+                }
+            }
+        } catch (e: Throwable) {
+            XLog.e(tag, "hook PluginInstance failure: " + e.message, e)
         }
     }
 }

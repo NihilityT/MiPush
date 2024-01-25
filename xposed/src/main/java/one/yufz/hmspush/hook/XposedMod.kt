@@ -1,6 +1,8 @@
 package one.yufz.hmspush.hook
 
+import android.content.pm.ApplicationInfo
 import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import one.yufz.hmspush.common.ANDROID_PACKAGE_NAME
 import one.yufz.hmspush.common.HMS_CORE_PROCESS
@@ -10,6 +12,8 @@ import one.yufz.hmspush.hook.fakedevice.FakeDevice
 import one.yufz.hmspush.hook.hms.HookHMS
 import one.yufz.hmspush.hook.system.HookSystemService
 import one.yufz.hmspush.hook.systemui.HookSystemUI
+import one.yufz.xposed.hook
+
 
 class XposedMod : IXposedHookLoadPackage {
     companion object {
@@ -33,6 +37,11 @@ class XposedMod : IXposedHookLoadPackage {
             return
         }
 
+        if (lpparam.packageName == "com.android.systemui") {
+            HookSystemUI().removeHyperOSFocusNotificationPackageLimit(lpparam.classLoader)
+            return
+        }
+
         if (lpparam.packageName == HMS_PACKAGE_NAME) {
             if (lpparam.processName == HMS_CORE_PROCESS) {
                 HookHMS().hook(lpparam)
@@ -45,6 +54,6 @@ class XposedMod : IXposedHookLoadPackage {
 //            return
 //        }
 
-         FakeDevice.fake(lpparam)
+        FakeDevice.fake(lpparam)
     }
 }
