@@ -3,19 +3,25 @@ package one.yufz.hmspush.hook
 import android.util.Log
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
+import one.yufz.hmspush.xposed.BuildConfig
 import java.lang.reflect.Method
 
 object XLog {
+    fun t(tag: String, message: String?) {
+        if (BuildConfig.DEBUG) {
+            XposedBridge.log("[MiPush][T][$tag] $message")
+        }
+    }
     fun d(tag: String, message: String?) {
-        XposedBridge.log("[MiPush]  $tag  $message")
+        XposedBridge.log("[MiPush][D][$tag] $message")
     }
 
     fun i(tag: String, message: String?) {
-        XposedBridge.log("[MiPush]  $tag  $message")
+        XposedBridge.log("[MiPush][I][$tag] $message")
     }
 
     fun e(tag: String, message: String?, throwable: Throwable?) {
-        i(tag, message)
+        XposedBridge.log("[MiPush][E][$tag] $message")
         XposedBridge.log(throwable)
     }
 
