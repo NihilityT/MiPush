@@ -46,7 +46,7 @@ open class Common : IFakeDevice {
                     XLog.d(TAG, "forHook $requestClass")
                     result = returnClass
                 } else {
-                    XLog.d(TAG, "forName $requestClass")
+                    XLog.t(TAG, "forName $requestClass")
                 }
             }
         }
