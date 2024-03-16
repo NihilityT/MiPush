@@ -3,6 +3,7 @@ package one.yufz.hmspush.hook.system
 import android.app.AndroidAppHelper
 import android.app.Notification
 import android.app.NotificationChannelGroup
+import android.content.Context
 import android.content.pm.ShortcutInfo
 import android.os.Binder
 import android.os.Build
@@ -18,11 +19,12 @@ import one.yufz.xposed.hook
 
 object ShortcutPermissionHooker {
     private fun fromHms() = try {
-        Binder.getCallingUid() == AndroidAppHelper.currentApplication().packageManager.getPackageUid(HMS_PACKAGE_NAME, 0)
+        getContext().packageManager.getNameForUid(Binder.getCallingUid()) == HMS_PACKAGE_NAME
     } catch (e: Throwable) {
         false
     }
 
+    private fun getContext(): Context = AndroidAppHelper.currentApplication()
     private fun tryHookPermission(packageName: String): Boolean {
         if (fromHms()) {
             Binder.clearCallingIdentity()
