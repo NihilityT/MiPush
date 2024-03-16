@@ -19,7 +19,7 @@ import one.yufz.xposed.hookMethod
 
 object NmsPermissionHooker {
     private fun fromHms() = try {
-        Binder.getCallingUid() == getPackageUid(HMS_PACKAGE_NAME)
+        getContext().packageManager.getNameForUid(Binder.getCallingUid()) == HMS_PACKAGE_NAME
     } catch (e: Throwable) {
         false
     }
@@ -103,7 +103,7 @@ object NmsPermissionHooker {
             doBefore {
                 val packageName = args[0] as String
                 if (Binder.getCallingUid() == Process.SYSTEM_UID) {
-                    args[1] = getPackageUid(packageName)
+                    args[1] = getPackageUid(packageName) // TODO: How to determine which user's channel we should delete? now force user 0
                 }
             }
         }
