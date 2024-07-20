@@ -53,7 +53,7 @@ ext {
     gitVersionName = getVersionName()
     APPLICATION_ID = "com.nihility.mipush"
 
-    COMPILE_SDK = 33
+    COMPILE_SDK = 34
     MIN_SDK = 26
-    TARGET_SDK = 33
+    TARGET_SDK = 34
 }
