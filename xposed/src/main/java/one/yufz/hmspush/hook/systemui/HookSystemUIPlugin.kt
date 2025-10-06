@@ -5,7 +5,7 @@ import de.robv.android.xposed.XposedHelpers
 import one.yufz.hmspush.hook.XLog
 import one.yufz.xposed.hook
 
-class RemoveHyperOSFocusNotificationPackageLimit(
+class HookSystemUIPlugin(
     private val packageName: String, private val hooker: ISystemUIPluginHooker
 ) {
     companion object {
