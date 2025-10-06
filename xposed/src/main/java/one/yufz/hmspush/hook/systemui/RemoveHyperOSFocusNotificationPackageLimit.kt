@@ -5,7 +5,9 @@ import de.robv.android.xposed.XposedHelpers
 import one.yufz.hmspush.hook.XLog
 import one.yufz.xposed.hook
 
-class RemoveHyperOSFocusNotificationPackageLimit {
+class RemoveHyperOSFocusNotificationPackageLimit(
+    private val packageName: String, private val hooker: HookNotificationSettingsManager
+) {
     companion object {
         private const val TAG = "FocusNotification"
     }
@@ -33,9 +35,9 @@ class RemoveHyperOSFocusNotificationPackageLimit {
                         XLog.d(TAG, "appInfo is null")
                         return@doAfter
                     }
-                    if ("miui.systemui.plugin" == appInfo!!.packageName && !isHooked) {
+                    if (packageName == appInfo!!.packageName && !isHooked) {
                         isHooked = true
-                        HookNotificationSettingsManager().doHook(result as ClassLoader)
+                        hooker.doHook(result as ClassLoader)
                     }
                 }
             }
