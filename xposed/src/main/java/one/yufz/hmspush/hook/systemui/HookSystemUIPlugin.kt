@@ -1,48 +1,44 @@
 package one.yufz.hmspush.hook.systemui
 
-import android.content.pm.ApplicationInfo
+import android.content.ComponentName
+import android.content.ContextWrapper
 import de.robv.android.xposed.XposedHelpers
 import one.yufz.hmspush.hook.XLog
+import one.yufz.xposed.getField
 import one.yufz.xposed.hook
 
 class HookSystemUIPlugin(
-    private val packageName: String, private val hooker: ISystemUIPluginHooker
+    private val pluginPackageName: String, private val hooker: ISystemUIPluginHooker
 ) {
     companion object {
-        private const val TAG = "FocusNotification"
+        private const val TAG = "HookSystemUIPlugin"
     }
 
     fun hook(classLoader: ClassLoader) {
         try {
-            val classFactory = XposedHelpers.findClass(
-                "com.android.systemui.shared.plugins.PluginInstance\$Factory",
+            val classPluginFactory = XposedHelpers.findClass(
+                "com.android.systemui.shared.plugins.PluginInstance\$PluginFactory",
                 classLoader
             )
-            var appInfo: ApplicationInfo? = null
-            classFactory.declaredMethods.find { it.name == "create" }!!.hook {
-                doBefore {
-                    appInfo = args[1] as ApplicationInfo
-                }
-            }
-            val classExternalSyntheticLambda0 = XposedHelpers.findClass(
-                "com.android.systemui.shared.plugins.PluginInstance\$Factory$\$ExternalSyntheticLambda0",
-                classLoader
-            )
-            classExternalSyntheticLambda0.declaredMethods.find { it.name == "get" }!!.hook {
-                var isHooked = false;
+            classPluginFactory.declaredMethods.find { it.name == "createPluginContext" }!!.hook {
                 doAfter {
-                    if (appInfo == null) {
-                        XLog.d(TAG, "appInfo is null")
-                        return@doAfter
-                    }
-                    if (packageName == appInfo!!.packageName && !isHooked) {
-                        isHooked = true
-                        hooker.hook(result as ClassLoader)
+                    val componentName =
+                        thisObject.getField("mComponentName", ComponentName::class.java)
+                    if (componentName!!.packageName == pluginPackageName) {
+                        unhook()
+                        val pluginContext = result as ContextWrapper
+                        val pluginLoader = pluginContext.classLoader
+                        XLog.d(TAG, "hook [$pluginPackageName] by Plugin ClassLoader: [$pluginLoader]")
+                        hooker.hook(pluginLoader)
                     }
                 }
             }
         } catch (e: Throwable) {
-            XLog.e(TAG, "hook PluginInstance failure: " + e.message, e)
+            XLog.e(
+                TAG,
+                "hook SystemUI Plugin [$pluginPackageName] with [${hooker.javaClass.name}] failure: " + e.message,
+                e
+            )
         }
     }
 
