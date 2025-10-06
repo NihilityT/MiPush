@@ -35,7 +35,7 @@ class RemoveHyperOSFocusNotificationPackageLimit {
                     }
                     if ("miui.systemui.plugin" == appInfo!!.packageName && !isHooked) {
                         isHooked = true
-                        doHook(result as ClassLoader)
+                        HookNotificationSettingsManager().doHook(result as ClassLoader)
                     }
                 }
             }
@@ -44,34 +44,4 @@ class RemoveHyperOSFocusNotificationPackageLimit {
         }
     }
 
-    private fun doHook(pluginLoader: ClassLoader) {
-        try {
-            XLog.d(TAG, "hook start")
-            val classNotificationSettingsManager = XposedHelpers.findClass(
-                "miui.systemui.notification.NotificationSettingsManager",
-                pluginLoader
-            )
-
-            XLog.d(TAG, "hook method")
-            classNotificationSettingsManager.declaredMethods.find { it.name == "canCustomFocus" }!!
-                .hook {
-                    replace {
-                        true
-                    }
-                }
-            classNotificationSettingsManager.declaredMethods.find { it.name == "canShowFocus" }!!
-                .hook {
-                    replace {
-                        true
-                    }
-                }
-            XLog.d(TAG, "hook end")
-        } catch (e: Throwable) {
-            XLog.e(
-                TAG,
-                "hook NotificationSettingsManager failure: " + e.message,
-                e
-            )
-        }
-    }
 }
