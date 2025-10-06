@@ -1,5 +1,5 @@
 package one.yufz.hmspush.hook.systemui
 
-interface ISystemUIPluginHooker {
+fun interface ISystemUIPluginHooker {
     fun hook(pluginLoader: ClassLoader)
 }
