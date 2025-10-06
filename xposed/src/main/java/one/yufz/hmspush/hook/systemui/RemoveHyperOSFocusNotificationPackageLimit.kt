@@ -6,7 +6,7 @@ import one.yufz.hmspush.hook.XLog
 import one.yufz.xposed.hook
 
 class RemoveHyperOSFocusNotificationPackageLimit(
-    private val packageName: String, private val hooker: HookNotificationSettingsManager
+    private val packageName: String, private val hooker: ISystemUIPluginHooker
 ) {
     companion object {
         private const val TAG = "FocusNotification"
@@ -37,7 +37,7 @@ class RemoveHyperOSFocusNotificationPackageLimit(
                     }
                     if (packageName == appInfo!!.packageName && !isHooked) {
                         isHooked = true
-                        hooker.doHook(result as ClassLoader)
+                        hooker.hook(result as ClassLoader)
                     }
                 }
             }

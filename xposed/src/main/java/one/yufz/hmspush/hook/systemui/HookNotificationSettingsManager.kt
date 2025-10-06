@@ -1,16 +1,15 @@
 package one.yufz.hmspush.hook.systemui
 
-import android.content.pm.ApplicationInfo
 import de.robv.android.xposed.XposedHelpers
 import one.yufz.hmspush.hook.XLog
 import one.yufz.xposed.hook
 
-class HookNotificationSettingsManager {
+class HookNotificationSettingsManager : ISystemUIPluginHooker {
     companion object {
         private const val TAG = "FocusNotification"
     }
 
-    fun doHook(pluginLoader: ClassLoader) {
+    override fun hook(pluginLoader: ClassLoader) {
         try {
             XLog.d(TAG, "hook start")
             val classNotificationSettingsManager = XposedHelpers.findClass(
