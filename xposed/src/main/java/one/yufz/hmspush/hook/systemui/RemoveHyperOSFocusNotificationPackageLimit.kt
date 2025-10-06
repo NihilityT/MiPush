@@ -34,42 +34,44 @@ class RemoveHyperOSFocusNotificationPackageLimit {
                         return@doAfter
                     }
                     if ("miui.systemui.plugin" == appInfo!!.packageName && !isHooked) {
-                        try {
-                            isHooked = true
-                            var pluginLoader = result as ClassLoader;
-
-                            XLog.d(TAG, "hook start")
-                            val classNotificationSettingsManager = XposedHelpers.findClass(
-                                "miui.systemui.notification.NotificationSettingsManager",
-                                pluginLoader
-                            )
-
-                            XLog.d(TAG, "hook method")
-                            classNotificationSettingsManager.declaredMethods.find { it.name == "canCustomFocus" }!!
-                                .hook {
-                                    replace {
-                                        true
-                                    }
-                                }
-                            classNotificationSettingsManager.declaredMethods.find { it.name == "canShowFocus" }!!
-                                .hook {
-                                    replace {
-                                        true
-                                    }
-                                }
-                            XLog.d(TAG, "hook end")
-                        } catch (e: Throwable) {
-                            XLog.e(
-                                TAG,
-                                "hook NotificationSettingsManager failure: " + e.message,
-                                e
-                            )
-                        }
+                        isHooked = true
+                        doHook(result as ClassLoader)
                     }
                 }
             }
         } catch (e: Throwable) {
             XLog.e(TAG, "hook PluginInstance failure: " + e.message, e)
+        }
+    }
+
+    private fun doHook(pluginLoader: ClassLoader) {
+        try {
+            XLog.d(TAG, "hook start")
+            val classNotificationSettingsManager = XposedHelpers.findClass(
+                "miui.systemui.notification.NotificationSettingsManager",
+                pluginLoader
+            )
+
+            XLog.d(TAG, "hook method")
+            classNotificationSettingsManager.declaredMethods.find { it.name == "canCustomFocus" }!!
+                .hook {
+                    replace {
+                        true
+                    }
+                }
+            classNotificationSettingsManager.declaredMethods.find { it.name == "canShowFocus" }!!
+                .hook {
+                    replace {
+                        true
+                    }
+                }
+            XLog.d(TAG, "hook end")
+        } catch (e: Throwable) {
+            XLog.e(
+                TAG,
+                "hook NotificationSettingsManager failure: " + e.message,
+                e
+            )
         }
     }
 }
