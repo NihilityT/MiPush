@@ -1,6 +1,7 @@
 package one.yufz.hmspush.hook
 
 import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import one.yufz.hmspush.common.ANDROID_PACKAGE_NAME
 import one.yufz.hmspush.common.HMS_CORE_PROCESS
@@ -11,6 +12,7 @@ import one.yufz.hmspush.hook.hms.HookHMS
 import one.yufz.hmspush.hook.system.HookSystemService
 import one.yufz.hmspush.hook.systemui.HookNotificationSettingsManager
 import one.yufz.hmspush.hook.systemui.HookSystemUIPlugin
+import one.yufz.xposed.hook
 
 
 class XposedMod : IXposedHookLoadPackage {
@@ -60,5 +62,29 @@ class XposedMod : IXposedHookLoadPackage {
             "miui.systemui.plugin",
             HookNotificationSettingsManager()
         ).hook(lpparam.classLoader)
+
+        HookSystemUIPlugin("miui.systemui.plugin") { pluginLoader ->
+            val tag = "HookFocusNotifUtils"
+            try {
+                val classFocusNotifUtils = XposedHelpers.findClass(
+                    "miui.systemui.notification.focus.FocusNotifUtils",
+                    pluginLoader
+                )
+
+                XLog.d(tag, "hooking canShowFocus method")
+                classFocusNotifUtils.declaredMethods.find { it.name == "canShowFocus" }!!
+                    .hook {
+                        replace {
+                            true
+                        }
+                    }
+            } catch (e: Throwable) {
+                XLog.e(
+                    tag,
+                    "hook failure: " + e.message,
+                    e
+                )
+            }
+        }.hook(lpparam.classLoader)
     }
 }
