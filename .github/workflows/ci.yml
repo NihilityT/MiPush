@@ -2,9 +2,11 @@ name: Android CI
 
 on:
   push:
-    branches: [ master, develop, alpha ]
   pull_request:
-    branches: [ master, develop, alpha ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -17,7 +19,7 @@ jobs:
         fetch-depth: 0
 
     - name: set up JDK 11
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v4
       with:
         java-version: '11'
         distribution: 'adopt'
@@ -33,10 +35,16 @@ jobs:
           echo ${{ secrets.SIGNING_KEY }} | base64 --decode > release.keystore
         fi
 
+    - name: Git describe
+      id: ghd
+      uses: proudust/gh-describe@v2.1.0
+      with:
+        exclude: v*-*
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build with Gradle
-      run: ./gradlew assemble
+      run: ./gradlew --build-cache --parallel --daemon -P versionName=${{ steps.ghd.outputs.describe }} assemble
 
     - name: Collect artifcat name
       run: |
@@ -44,13 +52,29 @@ jobs:
         echo "release_artifact=$(basename -s .apk app/build/outputs/apk/release/*.apk)" >> $GITHUB_ENV
 
     - name: Upload Debug
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: ${{ env.debug_artifact }}
         path: app/build/outputs/apk/debug/*.apk
 
     - name: Upload Release
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4.6.0
       with:
         name: ${{ env.release_artifact }}
         path: app/build/outputs/apk/release/*.apk
+
+    - name: Get Version Name
+      id: gvn
+      run: |
+        artifact_name=(app/build/outputs/apk/release/*.apk)
+        version=$(echo $artifact_name | sed 's/.*(v.*)(-[^-]+){2}/\1/' -r)
+        echo "version=$version" >> $GITHUB_OUTPUT
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        name: ${{ steps.gvn.outputs.version }}
+        tag_name: ${{ steps.gvn.outputs.version }}
+        target_commitish: ${{ steps.ghd.outputs.sha }}
+        prerelease: true
+        files: app/build/outputs/apk/*/*.apk
